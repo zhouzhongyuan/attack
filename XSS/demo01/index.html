@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Cross-site scripting Demo</title>
+</head>
+<body>
+<h1>Comments:</h1>
+<div id="board">
+    <input type="text" id="commentValue">
+    <input type="button" value="Add" id="addComment">
+    <hr />
+    <div id="boardList"></div>
+</div>
+
+
+<script>
+
+    const addComment = document.getElementById('addComment');
+    const boardList = document.getElementById('boardList');
+    addComment.addEventListener('click', onAdd, false);
+
+    document.addEventListener("DOMContentLoaded", function(event) {
+        getData('comment')
+            .then((data) => {
+                updateBoard(data);
+            })
+            .catch(error => console.error(error))
+    });
+
+
+    function onAdd() {
+        postData('comment', {comment: document.getElementById('commentValue').value})
+            .then((data) => {
+                updateBoard(data);
+            })
+            .catch(error => console.error(error))
+    }
+    function updateBoard(data) {
+        while (boardList.firstChild) {
+            boardList.removeChild(boardList.firstChild);
+        }
+        data.forEach((item) => {
+            const el = document.createElement('div');
+            const textNode = document.createTextNode(item);
+            el.appendChild(textNode);
+            boardList.appendChild(el);
+
+        })
+    }
+    function getData(url) {
+        return fetch(url, {
+        })
+            .then(response => response.json()) // parses response to JSON
+    }
+    function postData(url, data) {
+        // Default options are marked with *
+        return fetch(url, {
+            body: JSON.stringify(data), // must match 'Content-Type' header
+            cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+            credentials: 'same-origin', // include, same-origin, *omit
+            headers: {
+                'user-agent': 'Mozilla/4.0 MDN Example',
+                'content-type': 'application/json'
+            },
+            method: 'POST', // *GET, POST, PUT, DELETE, etc.
+            mode: 'cors', // no-cors, cors, *same-origin
+            redirect: 'follow', // *manual, follow, error
+            referrer: 'no-referrer', // *client, no-referrer
+        })
+            .then(response => response.json()) // parses response to JSON
+    }
+
+</script>
+</body>
+</html>
